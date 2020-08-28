@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -20,7 +20,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import {data} from './data';
+
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -52,7 +52,7 @@ const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Symbol' },
   { id: 'calories', numeric: true, disablePadding: false, label: 'Price' },
   { id: 'fat', numeric: true, disablePadding: false, label: 'Type' },
-  { id: 'carbs', numeric: true, disablePadding: false, label: 'Strike' },
+   { id: 'carbs', numeric: true, disablePadding: false, label: 'Strike' },
   { id: 'protein', numeric: true, disablePadding: false, label: 'Exp Date' },
   { id: 'name', numeric: false, disablePadding: true, label: 'DTE' },
   { id: 'calories', numeric: true, disablePadding: false, label: 'Bid' },
@@ -211,7 +211,19 @@ export default function DataTable() {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(50);
+  const [data,setData]=useState([]);
+  const [loading,setLoading]=useState(true);
+  useEffect(()=>{
+    fetch('http://localhost:8000/getdata')
+    .then(res=>res.json())
+    .then(result=>{
+      setData(result)
+      console.log(result)
+      setLoading(false)
+    }).catch(err=>console.log(err))
+  },[data])
+
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -267,6 +279,7 @@ export default function DataTable() {
 
   return (
     <div className={classes.root}>
+      {loading ? <div>Loading...</div> :
       <Paper className={classes.paper}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
@@ -306,19 +319,19 @@ export default function DataTable() {
                       <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.name}
                       </TableCell>
-                      <TableCell align="right">{row.Symbol}</TableCell>
-                      <TableCell align="right">{row.Price}</TableCell>
-                      <TableCell align="right">{row.Type}</TableCell>
-                      <TableCell align="right">{row.Strike}</TableCell>
-                      <TableCell align="right">{row.Exp}</TableCell>
+                      <TableCell align="right">{row.symbol}</TableCell>
+                      <TableCell align="right">{row.price}</TableCell>
+                      <TableCell align="right">{row.symbolType}</TableCell>
+                     <TableCell align="right">{row.strikeprice}</TableCell> 
+                      <TableCell align="right">{row.exp_date}</TableCell>
                       <TableCell align="right">{row.DTE}</TableCell>
-                      <TableCell align="right">{row.Bid}</TableCell>
-                      <TableCell align="right">{row.Midpoint}</TableCell>
-                      <TableCell align="right">{row.Ask}</TableCell>
-                      <TableCell align="right">{row.Last}</TableCell>
-                      <TableCell align="right">{row.Volume}</TableCell>
-                      <TableCell align="right">{row.OpenInt}</TableCell>
-                      <TableCell align="right">{row.Vol}</TableCell>
+                      <TableCell align="right">{row.bid}</TableCell>
+                      <TableCell align="right">{row.midpoint}</TableCell>
+                      <TableCell align="right">{row.ask}</TableCell>
+                      <TableCell align="right">{row.last}</TableCell>
+                      <TableCell align="right">{row.volume}</TableCell>
+                      <TableCell align="right">{row.openInt}</TableCell>
+                      <TableCell align="right">{row.VOI}</TableCell>
                       <TableCell align="right">{row.IV}</TableCell>
                       <TableCell align="right">{row.lastTrade}</TableCell>
                     </TableRow>
@@ -333,7 +346,7 @@ export default function DataTable() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[25, 50, 100]}
+          rowsPerPageOptions={[50]}
           component="div"
           count={data.length}
           rowsPerPage={rowsPerPage}
@@ -341,7 +354,7 @@ export default function DataTable() {
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
-      </Paper>
+      </Paper>}
       <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
